@@ -43,7 +43,7 @@ async def main(room_url: str, token, patient: str):
     transport = DailyTransport(
         room_url,
         token,
-        "Respond bot",
+        "Gravida AI",
         DailyParams(
             audio_out_enabled=True,
             audio_out_sample_rate=24000,
