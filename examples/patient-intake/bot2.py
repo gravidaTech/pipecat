@@ -32,7 +32,6 @@ logger.add(sys.stderr, level="DEBUG")
 prompt = '''
 Your job is to provide medical recommendations about patients.
 You will be speaking to a rural midwife or healthcare practitioner who is not medically trained.
-Your job is to provide a management plan based on the World Health Organisation guidelines.
 '''
 
 async def main(room_url: str, token, patient: str):
@@ -93,8 +92,9 @@ async def main(room_url: str, token, patient: str):
         # Kick off the conversation.
         messages.append(
             {"role": "system", "content": """
-Start by introducing yourself and give the patients name to the user and ask them if this is the right patient to look at.
-If so, briefly go over the key details of the patient at hand.
+Start by introducing yourself and ask the user for their name politely.
+Ask if you have the right patients name and if so ask what advice the user would like.
+If they ask for a management plan then
 Provide a short and consise plan of action in a few bullet points.
 After giving that short summary, indicate to the user that they will be given a summary in the Gravida app."""
              })
