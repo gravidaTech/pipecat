@@ -38,8 +38,8 @@ app.add_middleware(
 
 @app.get("/start")
 async def start_agent(request: Request):
-    print(f"!!! Creating room")
-    room_url, room_name = _create_room()
+    print(f"!!! Joining room")
+    room_url = "https://gravida.daily.co/GravidaAI"
     print(f"!!! Room URL: {room_url}")
     # Ensure the room property is present
     if not room_url:
@@ -77,7 +77,7 @@ async def start_agent(request: Request):
         raise HTTPException(
             status_code=500, detail=f"Failed to start subprocess: {e}")
 
-    return RedirectResponse(room_url)
+    # return RedirectResponse(room_url)
 
 
 @app.get("/status/{pid}")

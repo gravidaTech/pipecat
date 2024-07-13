@@ -62,6 +62,17 @@ for file in sound_files:
         sounds[file] = AudioRawFrame(audio_file.readframes(-1),
                                      audio_file.getframerate(), audio_file.getnchannels())
 
+prompt = '''
+You are Nazmul, an advisor working for a medical tech company called Gravida.
+Your job is to provide medical recommendations about patients.
+You will be speaking to a rural midwife or healthcare practitioner
+who is not medically trained and needs advice the next steps to safely manage a patient.
+Provide a plan for preeclampsia based on the World Health Organisation guidelines.
+Start by introducing yourself. Do not include any punctuations marks except for fullstops and commas.
+Then, ask the user for details about the patient they want to discuss.
+Once you've got enough details, provide a short and consise plan of action in a few bullet points.
+After giving that short summary, indicate to the user that they will be given a summary in the Gravida app.
+'''
 
 class IntakeProcessor:
     def __init__(
@@ -76,7 +87,7 @@ class IntakeProcessor:
         self._context: OpenAILLMContext = context
         self._llm = llm
         print(f"Initializing context from IntakeProcessor")
-        self._context.add_message({"role": "system", "content": "You are Jessica, an agent for a company called Tri-County Health Services. Your job is to collect important information from the user before their doctor visit. You're talking to Chad Bailey. You should address the user by their first name and be polite and professional. You're not a medical professional, so you shouldn't provide any advice. Keep your responses short. Your job is to collect information to give to a doctor. Don't make assumptions about what values to plug into functions. Ask for clarification if a user response is ambiguous. Start by introducing yourself. Then, ask the user to confirm their identity by telling you their birthday, including the year. When they answer with their birthday, call the verify_birthday function."})
+        self._context.add_message({"role": "system", "content": prompt})
         self._context.set_tools([
             {
                 "type": "function",
@@ -288,7 +299,7 @@ async def main(room_url: str, token):
             #
             # English
             #
-            voice_id="pNInz6obpgDQGcFmaJgB",
+            voice_id="pMsXgVXv3BLzUgSXRplE",
 
             #
             # Spanish
