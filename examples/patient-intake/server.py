@@ -105,7 +105,7 @@ if __name__ == "__main__":
     import uvicorn
 
     default_host = os.getenv("HOST", "0.0.0.0")
-    default_port = int(os.getenv("FAST_API_PORT", "7860"))
+    default_port = int(os.getenv("FAST_API_PORT", "80"))
 
     parser = argparse.ArgumentParser(
         description="Daily Storyteller FastAPI server")
