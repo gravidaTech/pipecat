@@ -36,6 +36,7 @@ Remember to stick to WHO guidelines.
 '''
 
 async def main(room_url: str, token, patient: str):
+    print("bot:", patient)
     transport = DailyTransport(
         room_url,
         token,
@@ -69,7 +70,7 @@ async def main(room_url: str, token, patient: str):
         },
         {
             "role": "system",
-            "content": "These are the patient details: " + patient      
+            "content": "These are the patient details: " + patient,      
             }
     ]
 
