@@ -39,7 +39,7 @@ app.add_middleware(
 @app.post("/start")
 async def start_agent(patient: dict):
     print("patient String:", patient)
-    patientStr = "'" + patient +"'"
+    patientStr = "'" + str(patient) +"'"
     print(f"!!! Joining room")
     room_url = "https://gravida.daily.co/GravidaAI"
     print(f"!!! Room URL: {room_url}")
