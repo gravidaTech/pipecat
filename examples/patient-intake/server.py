@@ -38,8 +38,7 @@ app.add_middleware(
 
 @app.post("/start")
 async def start_agent(patient: dict):
-    patientStr = str(patient)
-    print("patient String:", patientStr)
+    print("patient String:", patient)
     print(f"!!! Joining room")
     room_url = "https://gravida.daily.co/GravidaAI"
     print(f"!!! Room URL: {room_url}")
@@ -68,7 +67,7 @@ async def start_agent(patient: dict):
     try:
         proc = subprocess.Popen(
             [
-                f"python3 -m bot2 -u {room_url} -t {token} --patient {patientStr}"
+                f"python3 -m bot2 -u {room_url} -t {token} --patient {patient}"
             ],
             shell=True,
             bufsize=1,
