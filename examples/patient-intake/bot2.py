@@ -69,8 +69,8 @@ async def main(room_url: str, token, patient: str):
         },
         {
             "role": "system",
-            "content": "These are the patient details: Mrs. Rumena H. Begum (ID: M10946397), born on May 17, 1997, has a drug allergy to opioids causing migraines and a personal and family history of moderate rheumatoid arthritis. Her obstetric history includes two pregnancies with two vaginal deliveries, two caesarean sections, two miscarriages, and two terminations, and she is currently pregnant with a preference for vaginal delivery. Her current pregnancy, active since her first visit on July 13, 2024, follows a last menstrual period on January 12, 2024, and is complicated by moderate gonorrhea. Recent symptoms include systolic blood pressure of 100 mmHg, 3+ proteinuria, vaginal bleeding, headache with visual changes, and chest pain with dyspnoea."
-        }
+            "content": "These are the patient details: " + patient      
+            }
     ]
 
     tma_in = LLMUserResponseAggregator(messages)
