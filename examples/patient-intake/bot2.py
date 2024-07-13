@@ -32,6 +32,7 @@ logger.add(sys.stderr, level="DEBUG")
 prompt = '''
 Your job is to provide medical recommendations about patients.
 You will be speaking to a rural midwife or healthcare practitioner who is not medically trained.
+Remember to stick to WHO guidelines.
 '''
 
 async def main(room_url: str, token, patient: str):
@@ -91,13 +92,16 @@ async def main(room_url: str, token, patient: str):
         transport.capture_participant_transcription(participant["id"])
         # Kick off the conversation.
         messages.append(
-            {"role": "system", "content": """
-Start by introducing yourself and ask the user for their name politely.
-Ask if you have the right patients name and if so ask what advice the user would like.
+            {"role": "system", "content": "Start by introducing yourself and ask the user for their name politely."
+             })
+        
+        messages.append({"role": "system", "content":"Ask if you have the right patients name and if so ask what advice the user would like."})
+
+        messages.append({"role": "system", "content": """
 If they ask for a management plan then
 Provide a short and consise plan of action in a few bullet points.
-After giving that short summary, indicate to the user that they will be given a summary in the Gravida app."""
-             })
+After giving that short summary, indicate to the user that they will be given a summary in the Gravida app."""})
+
         await task.queue_frames([LLMMessagesFrame(messages)])
 
     runner = PipelineRunner()
