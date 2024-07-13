@@ -20,6 +20,13 @@ def configure():
         required=False,
         help="Daily API Key (needed to create an owner token for the room)",
     )
+    parser.add_argument(
+         "-p",
+        "--patient",
+        type=str,
+        required=False,
+        help="Patient details"
+    )
 
     args, unknown = parser.parse_known_args()
 
