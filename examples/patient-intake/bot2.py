@@ -98,16 +98,14 @@ async def main(room_url: str, token, patient: str):
         
         messages.append({"role": "system", "content":"Ask if you have the right patients name."})
 
-        messages.append({"role": "system", "content":"""Remind the user about the patients hypertension, proteinurea and any other notable symptoms briefly in one or two lines.
-Then ask what advice the user would like about the patient."""})
+        messages.append({"role": "system", "content":"If so, then ask what advice the user would like about the patient."})
 
         messages.append({"role": "system", "content": """
 If they ask for a management plan then
-Provide a short and concise personalised plan of action relevant to this patient in a few bullet points.
+Provide a short and concise plan of action in a few bullet points referring to patient details when relevant.
 Briefly advise on which symptoms to look out for that might need an emergency hospital admission.
 After giving that short summary, indicate to the user that they will be given a summary of this conversation in the Gravida app.
 """})
-        messages.append({"role": "system", "content": ""})
 
         await task.queue_frames([LLMMessagesFrame(messages)])
 
