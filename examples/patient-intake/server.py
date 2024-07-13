@@ -68,7 +68,7 @@ async def start_agent(patient: dict):
     try:
         proc = subprocess.Popen(
             [
-                f"python3 -m bot2 -u {room_url} -t {token} --patient {patient}"
+                f"python3 -m bot2 -u {room_url} -t {token} --patient {patientStr}"
             ],
             shell=True,
             bufsize=1,
