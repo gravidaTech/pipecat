@@ -36,8 +36,9 @@ app.add_middleware(
 )
 
 
-@app.get("/start")
-async def start_agent(request: Request):
+@app.post("/start")
+async def start_agent(patient: dict):
+    patientStr = str(patient)
     print(f"!!! Joining room")
     room_url = "https://gravida.daily.co/GravidaAI"
     print(f"!!! Room URL: {room_url}")
@@ -66,7 +67,7 @@ async def start_agent(request: Request):
     try:
         proc = subprocess.Popen(
             [
-                f"python3 -m bot -u {room_url} -t {token}"
+                f"python3 -m bot2 -u {room_url} -t {token} -p {patientStr}"
             ],
             shell=True,
             bufsize=1,
@@ -77,7 +78,7 @@ async def start_agent(request: Request):
         raise HTTPException(
             status_code=500, detail=f"Failed to start subprocess: {e}")
 
-    # return RedirectResponse(room_url)
+    return # RedirectResponse(room_url)
 
 
 @app.get("/status/{pid}")
