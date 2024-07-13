@@ -32,6 +32,7 @@ def configure():
 
     url = args.url or os.getenv("DAILY_SAMPLE_ROOM_URL")
     key = args.apikey or os.getenv("DAILY_API_KEY")
+    patient = args.patient
 
     if not url:
         raise Exception(
@@ -62,4 +63,4 @@ def configure():
 
     token: str = res.json()["token"]
 
-    return (url, token)
+    return (url, token, patient)
