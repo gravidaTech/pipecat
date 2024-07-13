@@ -36,7 +36,7 @@ Remember to stick to WHO guidelines.
 '''
 
 async def main(room_url: str, token, patient: str):
-    print("bot:", patient)
+    logger.debug("PATIENT DETAILS:" + patient)
     transport = DailyTransport(
         room_url,
         token,
