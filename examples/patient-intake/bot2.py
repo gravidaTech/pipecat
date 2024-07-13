@@ -93,8 +93,8 @@ async def main(room_url: str, token, patient: str):
         # Kick off the conversation.
         messages.append(
             {"role": "system", "content": """
-Start by introducing yourself.
-Briefly go over the key details of the patient at hand.
+Start by introducing yourself and give the patients name to the user and ask them if this is the right patient to look at.
+If so, briefly go over the key details of the patient at hand.
 Provide a short and consise plan of action in a few bullet points.
 After giving that short summary, indicate to the user that they will be given a summary in the Gravida app."""
              })
