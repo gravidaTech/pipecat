@@ -32,6 +32,7 @@ logger.add(sys.stderr, level="DEBUG")
 prompt = '''
 Your job is to provide medical recommendations about patients.
 You will be speaking to a rural midwife or healthcare practitioner who is not medically trained.
+If any appointments are requested to be scheduled. Say thank you and note that they will be scheduled.
 Remember to stick to WHO guidelines.
 '''
 
@@ -70,7 +71,7 @@ async def main(room_url: str, token, patient: str):
         },
         {
             "role": "system",
-            "content": "These are the patient details: " + patient,      
+            "content": "These are the patient details: " + patient + "Based on our models, the patient is predicted to have severe preeclampsia."      
             }
     ]
 
