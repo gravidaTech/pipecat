@@ -8,7 +8,7 @@ import asyncio
 import os
 import sys
 
-from pipecat.frames.frames import LLMMessagesFrame
+from pipecat.frames.frames import EndFrame, LLMMessagesFrame
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -88,6 +88,10 @@ async def main(room_url: str, token, patient: str):
     ])
 
     task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
+
+    @transport.event_handler("on_participant_left")
+    async def on_participant_left(transport, participant, idkwhatthisismeanttobe):
+         await task.queue_frames([EndFrame()])
 
     @transport.event_handler("on_first_participant_joined")
     async def on_first_participant_joined(transport, participant):
