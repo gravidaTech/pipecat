@@ -2,6 +2,7 @@ import os
 import argparse
 import subprocess
 import atexit
+import dotenv
 
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,8 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from utils.daily_helpers import create_room as _create_room, get_token
 
 MAX_BOTS_PER_ROOM = 1
+
+dotenv.load_dotenv()
 
 # Bot sub-process dict for status reporting and concurrency control
 bot_procs = {}
@@ -38,10 +41,11 @@ app.add_middleware(
 
 @app.post("/start")
 async def start_agent(patient: dict):
+    patient = {"name":"Luqmaan"}
     print("patient String:", patient)
     patientStr = "'" + str(patient) +"'"
     print(f"!!! Joining room")
-    room_url = "https://gravida.daily.co/GravidaAI"
+    room_url = os.getenv("DAILY_SAMPLE_ROOM_URL", "https://gravida.daily.co/Test")
     print(f"!!! Room URL: {room_url}")
     # Ensure the room property is present
     if not room_url:
