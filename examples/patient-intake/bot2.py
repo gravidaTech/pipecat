@@ -78,7 +78,7 @@ async def main(room_url: str, token, patient: str):
 
     tts = OpenAITTSService(
         api_key=os.getenv("OPENAI_API_KEY"),
-        voice="onyx"
+        voice="alloy"
     )
 
     llm = OpenAILLMService(
