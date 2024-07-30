@@ -7,8 +7,10 @@
 import asyncio
 import os
 import sys
+import openai
 
-from pipecat.frames.frames import EndFrame, LLMMessagesFrame
+from pipecat.frames.frames import (
+    EndFrame, LLMMessagesFrame)
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -36,6 +38,29 @@ If any appointments are requested to be scheduled. Say thank you and note that t
 Remember to stick to WHO guidelines.
 '''
 
+async def summarise(messages: dict):
+    prompt = f"""
+    Your job is to provide medical recommendations about patients. 
+    You will be speaking to a rural midwife or healthcare practitioner who is not medically trained.
+    The patient has had a call with a medical assistant. Here is a transcript of the call:
+
+    {messages}
+
+    Provide a detailed summary which can be displayed to the practitioner to help aid them in caring for the patient.
+    Do not include any mention of the summary being provided on the Gravida app.
+    """
+    summary = openai.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+            {
+            "role": "system",
+            "content": prompt,
+            },
+        ],
+    )
+    return(summary.choices[0].message.content)
+
+
 async def main(room_url: str, token, patient: str):
     logger.debug("PATIENT DETAILS:" + patient)
     transport = DailyTransport(
@@ -53,7 +78,7 @@ async def main(room_url: str, token, patient: str):
 
     tts = OpenAITTSService(
         api_key=os.getenv("OPENAI_API_KEY"),
-        voice="alloy"
+        voice="onyx"
     )
 
     llm = OpenAILLMService(
@@ -90,7 +115,9 @@ async def main(room_url: str, token, patient: str):
     task = PipelineTask(pipeline, PipelineParams(allow_interruptions=True))
 
     @transport.event_handler("on_participant_left")
-    async def on_participant_left(transport, participant, idkwhatthisismeanttobe):
+    async def on_participant_left(transport, participant, arg):
+         summary = await summarise(messages)
+         print(summary)
          await task.queue_frames([EndFrame()])
 
     @transport.event_handler("on_first_participant_joined")
@@ -117,7 +144,6 @@ After giving that short summary, indicate to the user that they will be given a 
     runner = PipelineRunner()
 
     await runner.run(task)
-
 
 if __name__ == "__main__":
     (url, token, patient) = configure()
