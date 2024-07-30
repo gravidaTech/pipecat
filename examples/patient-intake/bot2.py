@@ -10,7 +10,7 @@ import sys
 import openai
 
 from pipecat.frames.frames import (
-    EndFrame, LLMMessagesFrame)
+    EndFrame, LLMMessagesFrame, ImageRawFrame)
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -22,6 +22,8 @@ from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecat.vad.silero import SileroVADAnalyzer
 
 from runner import configure
+
+from PIL import Image
 
 from loguru import logger
 
@@ -37,6 +39,17 @@ You will be speaking to a rural midwife or healthcare practitioner who is not me
 If any appointments are requested to be scheduled. Say thank you and note that they will be scheduled.
 Remember to stick to WHO guidelines.
 '''
+
+scriptDir = os.path.dirname(__file__)
+def loadImage(imgFile):
+    imgPath = os.path.join(scriptDir, "../patient-intake", imgFile)
+    with Image.open(imgPath) as img:
+        image = ImageRawFrame(image=img.tobytes(), size=img.size, format=img.format)
+    return image
+
+botImage = loadImage("gravidapfp.jpg")
+imageWidth = botImage.size[0]
+imageHeight = botImage.size[1]
 
 async def summarise(messages: dict):
     prompt = f"""
@@ -72,7 +85,10 @@ async def main(room_url: str, token, patient: str):
             audio_out_sample_rate=24000,
             transcription_enabled=True,
             vad_enabled=True,
-            vad_analyzer=SileroVADAnalyzer()
+            vad_analyzer=SileroVADAnalyzer(),
+            camera_out_enabled=True,
+            camera_out_height=imageWidth,
+            camera_out_width=imageHeight
         )
     )
 
@@ -118,7 +134,7 @@ async def main(room_url: str, token, patient: str):
     async def on_participant_left(transport, participant, arg):
          summary = await summarise(messages)
          print(summary)
-         await task.queue_frames([EndFrame()])
+         await task.queue_frame(EndFrame())
 
     @transport.event_handler("on_first_participant_joined")
     async def on_first_participant_joined(transport, participant):
@@ -139,7 +155,7 @@ Briefly advise on which symptoms to look out for that might need an emergency ho
 After giving that short summary, indicate to the user that they will be given a general outline of the conversation in the Gravida app.
 """})
 
-        await task.queue_frames([LLMMessagesFrame(messages)])
+        await task.queue_frames([botImage, LLMMessagesFrame(messages)])
 
     runner = PipelineRunner()
 
