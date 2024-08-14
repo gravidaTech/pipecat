@@ -39,7 +39,7 @@ app.add_middleware(
 @app.post("/start")
 async def start_agent(patient: dict):
     print("patient String:", patient)
-    patientStr = "'" + str(patient) +"'"
+    patientStr = '"' + str(patient) + '"'
     print(f"!!! Joining room")
     room_url = "https://gravida.daily.co/GravidaAI"
     print(f"!!! Room URL: {room_url}")
@@ -105,7 +105,7 @@ if __name__ == "__main__":
     import uvicorn
 
     default_host = os.getenv("HOST", "0.0.0.0")
-    default_port = int(os.getenv("FAST_API_PORT", "80"))
+    default_port = int(os.getenv("FAST_API_PORT", "8000"))
 
     parser = argparse.ArgumentParser(
         description="Daily Storyteller FastAPI server")
