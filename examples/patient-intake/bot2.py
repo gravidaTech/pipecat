@@ -10,7 +10,7 @@ import sys
 import openai
 
 from pipecat.frames.frames import (
-    EndFrame, LLMMessagesFrame)
+    EndFrame, LLMMessagesFrame, ImageRawFrame)
 from pipecat.pipeline.pipeline import Pipeline
 from pipecat.pipeline.runner import PipelineRunner
 from pipecat.pipeline.task import PipelineParams, PipelineTask
@@ -21,7 +21,11 @@ from pipecat.services.openai import OpenAILLMService
 from pipecat.transports.services.daily import DailyParams, DailyTransport
 from pipecat.vad.silero import SileroVADAnalyzer
 
+from supabase import create_client, Client
+
 from runner import configure
+
+from PIL import Image
 
 from loguru import logger
 
@@ -34,9 +38,26 @@ logger.add(sys.stderr, level="DEBUG")
 prompt = '''
 Your job is to provide medical recommendations about patients.
 You will be speaking to a rural midwife or healthcare practitioner who is not medically trained.
-If any appointments are requested to be scheduled. Say thank you and note that they will be scheduled.
+If any appointments are requested to be scheduled, say thank you and note that they will be scheduled.
 Remember to stick to WHO guidelines.
 '''
+### SUPABASE SETUP
+supabaseUrl: str = os.environ.get("SUPABASE_URL")
+supabaseKey: str = os.environ.get("SUPABASE_ANON_KEY")
+supabase = create_client(supabaseUrl, supabaseKey)
+
+### LOADING IMAGE FROM FILE
+scriptDir = os.path.dirname(__file__)
+def loadImage(imgFile):
+    imgPath = os.path.join(scriptDir, "../patient-intake", imgFile)
+    with Image.open(imgPath) as img:
+        image = ImageRawFrame(image=img.tobytes(), size=img.size, format=img.format)
+    return image
+
+### SETTING BOT CAMERA SIZE TO BE EQUAL TO THE IMAGE SIZE
+botImage = loadImage("gravidapfp.jpg")
+imageWidth = botImage.size[0]
+imageHeight = botImage.size[1]
 
 async def summarise(messages: dict):
     prompt = f"""
@@ -47,6 +68,8 @@ async def summarise(messages: dict):
     {messages}
 
     Provide a detailed summary which can be displayed to the practitioner to help aid them in caring for the patient.
+    Do not include patient medical history or patient details, only include intervention and future care advice.
+    Do not include any mention of the physician's name, follow-up questions or follow-up appointments.
     Do not include any mention of the summary being provided on the Gravida app.
     """
     summary = openai.chat.completions.create(
@@ -58,11 +81,13 @@ async def summarise(messages: dict):
             },
         ],
     )
-    return(summary.choices[0].message.content)
+    
+    return (summary.choices[0].message.content) # returns the response of the LLM to the above prompt
 
 
 async def main(room_url: str, token, patient: str):
     logger.debug("PATIENT DETAILS:" + patient)
+    print("PATIENT DETAILS:" + patient)
     transport = DailyTransport(
         room_url,
         token,
@@ -72,7 +97,10 @@ async def main(room_url: str, token, patient: str):
             audio_out_sample_rate=24000,
             transcription_enabled=True,
             vad_enabled=True,
-            vad_analyzer=SileroVADAnalyzer()
+            vad_analyzer=SileroVADAnalyzer(),
+            camera_out_enabled=True,
+            camera_out_height=imageWidth,
+            camera_out_width=imageHeight
         )
     )
 
@@ -116,10 +144,13 @@ async def main(room_url: str, token, patient: str):
 
     @transport.event_handler("on_participant_left")
     async def on_participant_left(transport, participant, arg):
-         summary = await summarise(messages)
-         print(summary)
-         await task.queue_frames([EndFrame()])
+        patientID = eval(patient) ["id"] # takes patient JSON string, converts it to dictionary, and retrieves id
+        summary = await summarise(messages) # retrieves summary and patientID
+        supabase.table("patient summaries").insert({"id":patientID, "summary":summary}).execute() # creates new row in table
+        #print(summary)
 
+        await task.queue_frame(EndFrame()) # leave the call
+         
     @transport.event_handler("on_first_participant_joined")
     async def on_first_participant_joined(transport, participant):
         transport.capture_participant_transcription(participant["id"])
@@ -139,7 +170,7 @@ Briefly advise on which symptoms to look out for that might need an emergency ho
 After giving that short summary, indicate to the user that they will be given a general outline of the conversation in the Gravida app.
 """})
 
-        await task.queue_frames([LLMMessagesFrame(messages)])
+        await task.queue_frames([botImage, LLMMessagesFrame(messages)])
 
     runner = PipelineRunner()
 
